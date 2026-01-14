@@ -17,7 +17,7 @@ const registerUser= asyncHandler(async (req,res)=>{
 
       //get user deatils from frontend
       const{fullName,email,username,password}=req.body
-      console.log("email:",email)
+     // console.log("email:",email)
 
       //validation- not empty
       if(
@@ -29,7 +29,7 @@ const registerUser= asyncHandler(async (req,res)=>{
       }
 
       //check if user already exist: username,email
-     const existedUser= User.findOne({
+     const existedUser=await User.findOne({
         $or:[{username},{email}]
      })
 
@@ -37,9 +37,17 @@ const registerUser= asyncHandler(async (req,res)=>{
        throw new ApiError(409,"username or email already exists")
      }
 
+      //console.log(req.files);
+
      //check for images check for avtar
      const avtarLocalPath=req.files?.avatar[0]?.path;
-     const coverImageLocalPath=req.files?.coverImage[0]?.path;
+     //const coverImageLocalPath=req.files?.coverImage[0]?.path;
+
+     let coverImageLocalPath;
+     if(req.files&&Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
+
+        coverImageLocalPath=req.files.coverImage[0].path
+     }
 
     if(!avtarLocalPath){
       throw new ApiError(400,"avatar file is required")
@@ -64,7 +72,7 @@ const registerUser= asyncHandler(async (req,res)=>{
       })
       // check for user creation
       //remove password and refreh token fields from responce
-      const createdUser=User.findById(user._id).select(
+      const createdUser=await User.findById(user._id).select(
         "-password -refreshToken"
       )
       if(!createdUser){
