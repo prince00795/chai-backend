@@ -229,13 +229,13 @@ const refreshAccessToken=asyncHandler(async(req,res)=>{
 })
 
 const changeCurrentPassword=asyncHandler(async(req,res)=>{
-  const{oldPassword,currrentPassword}=req.body
+  const{oldPassword,newPassword}=req.body
   const user=await User.findById(req.user?._id)
   const isPasswordCorrect=user.isPasswordCorrect(oldPassword)
   if(!isPasswordCorrect){
     throw new ApiError(400,"invalid Old password")
   }
-  user.password=currrentPassword
+  user.password=newPassword
   await user.save({validateBeforeSave:false})
 
   return res
@@ -244,16 +244,16 @@ const changeCurrentPassword=asyncHandler(async(req,res)=>{
 
 })
 
-const getCurrentUser=asyncHandler(async(req,res)=>{
+const getCurrentUser=asyncHandler(async(req,res)=>{ 
   return res
   .status(200)
-  .json(200,req.user,"user fetched succesfully")
+  .json(new ApiResponse(200,req.user,"user fetched succesfully"))
 
 })
 
 const updateAccountDetails=asyncHandler(async(req,res)=>{
   const {fullName,email}=req.body;
-  const user=User.findByIdAndUpdate(
+  const user=await  User.findByIdAndUpdate(
     req.user?._id,
     {
       $set:{
